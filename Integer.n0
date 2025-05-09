@@ -1,0 +1,101 @@
+MODULE Integer;
+
+IMPORT Buffer;
+
+
+CONST
+
+  Max* = 9223372036854775807;
+  Min* = -Max - 1;
+  MaxLen* = 20;
+
+
+PROCEDURE Get*(VAR buf : Buffer.Rec; VAR i : LONGINT);
+
+  VAR ch : CHAR; minus : BOOLEAN; valid : BOOLEAN;
+
+  BEGIN
+    ASSERT(buf.pos < buf.limit);
+    minus := buf.data[buf.pos] = 2DX;
+    IF minus THEN buf.pos := buf.pos + 1 END;
+    i := 0; valid := TRUE;
+    WHILE valid & (buf.pos < buf.limit) DO
+      ch := buf.data[buf.pos];
+      valid := (ch >= 30X) & (ch <= 39X);
+      IF valid THEN
+        i := i * 10 + ORD(ch) - 30H;
+        buf.pos := buf.pos + 1
+      END
+    END;
+    IF minus THEN i := -i END
+  END Get;
+
+
+PROCEDURE Put*(VAR buf : Buffer.Rec; i : LONGINT);
+
+  VAR j : INTEGER; tmp : ARRAY MaxLen + 1 OF CHAR;
+
+  BEGIN
+    j := 0;
+    IF i = Min THEN
+      (* -9223372036854775808 *)
+      Buffer.PutChars(buf, 8, 2D39323233333732H);
+      Buffer.PutChars(buf, 8, 3033363835343737H);
+      Buffer.PutChars(buf, 4, 35383038H);
+      i := 0
+    ELSIF i < 0 THEN
+      Buffer.PutChar(buf, 2DX);
+      i := -i
+    ELSIF i = 0 THEN
+      tmp[0] := 30X;
+      j := j + 1
+    END;
+    WHILE i # 0 DO
+      tmp[j] := CHR(30H + i MOD 10);
+      j := j + 1;
+      i := i DIV 10
+    END;
+    WHILE j > 0 DO
+      j := j - 1;
+      Buffer.PutChar(buf, tmp[j])
+    END
+  END Put;
+
+
+PROCEDURE GetHex*(VAR buf : Buffer.Rec; VAR i : LONGINT);
+
+  VAR ch : CHAR; minus : BOOLEAN; valid : BOOLEAN;
+
+  BEGIN
+    ASSERT(buf.pos < buf.limit);
+    i := 0; valid := TRUE;
+    WHILE valid & (buf.pos < buf.limit) DO
+      ch := buf.data[buf.pos];
+      buf.pos := buf.pos + 1;
+      valid := (ch >= 30X) & (ch <= 39X);
+      IF valid THEN
+        i := i * 16 + ORD(ch) - 30H
+      ELSE
+        valid := (ch >= 41X) & (ch <= 46X);
+        i := i * 16 + ORD(ch) - 41H + 10
+      END
+    END
+  END GetHex;
+
+
+PROCEDURE PutHex*(VAR buf : Buffer.Rec; i : LONGINT);
+
+  VAR j : INTEGER; k : INTEGER;
+
+  BEGIN
+    j := -60;
+    WHILE j <= 0 DO
+      k := BITA(ASH(i, j), 15);
+      IF k < 10 THEN k := k + 30H ELSE k := k + (41H - 10) END;
+      Buffer.PutChar(buf, CHR(k));
+      j := j + 4
+    END
+  END PutHex;
+
+
+END Integer.

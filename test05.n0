@@ -1,0 +1,154 @@
+MODULE test05;
+
+IMPORT D := testDefs, S := testStore;
+
+
+CONST
+
+  I3374875 = 74875 + 1100000 * 3 - 0;
+
+
+VAR
+
+  a : INTEGER; b : INTEGER; c : INTEGER; d : INTEGER;
+  e : INTEGER; f : INTEGER; g : INTEGER; h : INTEGER;
+
+
+PROCEDURE IntValues;
+
+  VAR x : SHORTINT;
+
+  BEGIN
+    x := 0FFFFFH;
+    ASSERT(x = -1);
+    a := 0FFFFFH;
+    ASSERT(a = 0FFFFFH);
+    ASSERT(I3374875 = 3374875)
+  END IntValues;
+
+
+PROCEDURE IntConstRelations;
+
+  VAR x : D.MiniInt;
+
+  BEGIN
+    x := D.MaxShortInt;
+
+    ASSERT(1 < 2);
+    ASSERT(~(2 < 1));
+
+    ASSERT(x < D.MaxLongInt);
+    ASSERT(8000H >= D.MaxShortInt);
+    ASSERT(x >= D.MaxShortInt);
+    ASSERT(07FFFH <= D.MaxShortInt);
+    ASSERT(x <= D.MaxShortInt);
+    ASSERT(8000H > D.MaxShortInt);
+    ASSERT(x > 7FFEH);
+
+    ASSERT(x > 7FFEH);
+    ASSERT(~(x < 7FFFH));
+
+    ASSERT(x < S.integer);
+    ASSERT(~(x = S.integer))
+  END IntConstRelations;
+
+
+PROCEDURE IntConstOperations;
+
+  BEGIN
+    ASSERT(D.Cr = 0AX);
+    ASSERT(D.Cr = CHR(10));
+    ASSERT(ORD(D.Lf) = 13);
+    ASSERT(D.MaxShortInt + 1 = 08000H);
+    ASSERT(0 - 1 = -1);
+    ASSERT(44 MOD 8 = 4); (* 00101100 & 00000111 = 00000100 *)
+    ASSERT((-44) MOD 8 = 4); (* 11101100 & 00000111 = 4 *)
+    ASSERT(- 44 MOD 8 = -4);
+    ASSERT(-1 - D.MaxLongInt = -D.MaxLongInt - 1);
+    ASSERT(-D.MaxLongInt + (-2) = D.MaxLongInt);
+    ASSERT(44 * 10 * 1000 + 1234 - 234 = 441000);
+    ASSERT((-555) DIV 5 DIV (-11) = 10)
+  END IntConstOperations;
+
+
+PROCEDURE IntOperations;
+
+  VAR d : LONGINT;
+
+  BEGIN
+    a := 100000;
+    b := a * a;
+    ASSERT(b = 1410065408); (* 2|540BE400H *)
+    c := b DIV 16;
+    ASSERT(88129088 - c = 0);
+    d := a * a;
+    ASSERT(d = 2540BE400H)
+  END IntOperations;
+
+
+PROCEDURE IntRelations;
+
+  VAR test : BOOLEAN;
+
+  BEGIN
+    a := 1; b := 2; c := 3; d := 4;
+    e := 5; f := 6; g := 7; h := 8;
+    ASSERT(a < b);
+    ASSERT(~(d < c));
+    ASSERT(e < f);
+    ASSERT(g < h);
+    ASSERT(((a < b) & (d < c)) OR ((e < f) & (g < h)));
+    ASSERT(((c < d) OR (a < b)) & ((e < f) OR (g < h)));
+    test := ((a < b) & (c = d)) OR ~((e = f) & (g < h));
+    ASSERT(test);
+    test := ((c > d) OR (a < b)) & ~((e = f) OR (g > h));
+    ASSERT(test)
+  END IntRelations;
+
+
+PROCEDURE IntCharConversions;
+
+  VAR c : CHAR; i : INTEGER;
+
+  BEGIN
+    ASSERT(D.Cr = CHR(10));
+    ASSERT(S.char = CHR(10));
+    i := 65;
+    ASSERT(ORD(41X) = i);
+    c := CHR(65);
+    ASSERT(i = ORD(c));
+    ASSERT(ORD(D.Lf) = 13);
+    c := 0AX;
+    ASSERT(ORD(S.char) = ORD(c))
+  END IntCharConversions;
+
+
+PROCEDURE IntBitOps;
+
+  VAR a : LONGINT;
+
+  BEGIN
+    ASSERT(ASH(1, 4) = 16);
+    ASSERT(ASH(16, -4) = 1);
+    ASSERT(ASH(3456, 0) = 3456);
+    (* AA00000000000000 *)
+    ASSERT(ASH(-6196953087261802496, -56) = -86);
+    a := -6196953087261802496; b := -56; c := ASH(a, b);
+    ASSERT(c = -86);
+    ASSERT(ASH(c, 3) = -688);
+    ASSERT(BITA(-1, 15) = 15);
+    a := 0FABB77H; c := 255;
+    ASSERT(BITA(ASH(a, -16), c) = 0FAH);
+    ASSERT(BITO(a, 255) = 0FABBFFH)
+  END IntBitOps;
+
+
+BEGIN
+  IntValues;
+  IntConstRelations;
+  IntConstOperations;
+  IntOperations;
+  IntRelations;
+  IntCharConversions;
+  IntBitOps
+END test05.

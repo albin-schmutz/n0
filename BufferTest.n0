@@ -1,0 +1,96 @@
+MODULE BufferTest;
+
+IMPORT Buffer;
+
+
+PROCEDURE TestPutGetChar;
+
+  VAR buf : Buffer.Rec; ch : CHAR;
+
+  BEGIN
+    Buffer.Reset(buf);
+    ASSERT(buf.pos = 0);
+    ASSERT(buf.pos < buf.limit);
+    Buffer.PutChar(buf, 41X);
+    ASSERT(buf.pos = 1);
+    ASSERT(buf.pos < buf.limit);
+    Buffer.PutChar(buf, 42X);
+    ASSERT(buf.pos = 2);
+    ASSERT(buf.pos < buf.limit);
+
+    Buffer.Flip(buf);
+    ASSERT(buf.pos = 0);
+    ASSERT(buf.limit = 2);
+    Buffer.GetChar(buf, ch);
+    ASSERT(ch = 41X);
+    ASSERT(buf.pos < buf.limit);
+    Buffer.GetChar(buf, ch);
+    ASSERT(ch = 42X);
+    ASSERT(buf.pos >= buf.limit)
+  END TestPutGetChar;
+
+
+PROCEDURE TestPutGetChars;
+
+  VAR buf : Buffer.Rec; i : LONGINT;
+
+  BEGIN
+    Buffer.Reset(buf);
+    Buffer.PutChar(buf, 22X);
+    Buffer.PutChars(buf, 5, 01234567H);
+    ASSERT(buf.pos = 6);
+    Buffer.Flip(buf);
+    Buffer.GetChars(buf, 6, i);
+    ASSERT(i = 220001234567H);
+
+    Buffer.Reset(buf);
+    Buffer.PutChars(buf, 4, -848374958); (* FFFFFFFFCD6ED352 *)
+    Buffer.Flip(buf);
+    Buffer.GetChars(buf, 4, i);
+    ASSERT(i = 0CD6ED352H);
+
+    Buffer.Reset(buf);
+    Buffer.PutChars(buf, 4, 1);
+    Buffer.PutChars(buf, 4, 0);
+    Buffer.PutChars(buf, 4, -1);
+    Buffer.Flip(buf);
+    Buffer.GetChars(buf, 4, i);
+    ASSERT(i = 1);
+    Buffer.GetChars(buf, 4, i);
+    ASSERT(i = 0);
+    Buffer.GetChars(buf, 4, i);
+    ASSERT(i = 0FFFFFFFFH);
+
+    Buffer.Reset(buf);
+    Buffer.PutChars(buf, 4, 01234567H);
+    Buffer.PutChars(buf, 4, 9ABCDEF0H);
+    Buffer.Flip(buf);
+    Buffer.GetChars(buf, buf.limit, i);
+    ASSERT(i = 012345679ABCDEF0H)
+  END TestPutGetChars;
+
+
+PROCEDURE TestPutBuffer;
+
+  VAR buf : Buffer.Rec; buf2 : Buffer.Rec; i : LONGINT;
+
+  BEGIN
+    Buffer.Reset(buf2);
+    Buffer.PutChars(buf2, 6, 48616C6C6F00H);
+    Buffer.Flip(buf2);
+
+    Buffer.Reset(buf);
+    Buffer.PutChar(buf, 0FFX);
+    Buffer.PutBuffer(buf, buf2);
+    ASSERT(buf.pos = 7);
+    Buffer.Flip(buf);
+    Buffer.GetChars(buf, 7, i);
+    ASSERT(i = 0FF48616C6C6F00H)
+  END TestPutBuffer;
+
+
+BEGIN
+  TestPutGetChar;
+  TestPutGetChars;
+  TestPutBuffer
+END BufferTest.

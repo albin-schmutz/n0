@@ -1,0 +1,47 @@
+MODULE testStore;
+
+IMPORT D := testDefs;
+
+
+VAR
+
+  boolean* : BOOLEAN;
+  char* : CHAR;
+  shortInt* : SHORTINT;
+  integer* : INTEGER;
+  longInt* : LONGINT;
+
+  integers* : D.Integers;
+  tripolis* : ARRAY 10 OF ARRAY 5 OF ARRAY 2 OF SHORTINT;
+  point* : RECORD x* : SHORTINT; y* : SHORTINT END;
+
+
+PROCEDURE SwapBoolean*(VAR a : BOOLEAN; VAR b : BOOLEAN);
+
+  VAR c : BOOLEAN;
+
+  BEGIN
+    c := a; a := b; b := c
+  END SwapBoolean;
+
+
+PROCEDURE SwapLongInt*(VAR a : LONGINT; VAR b : LONGINT);
+
+  VAR c : LONGINT;
+
+  BEGIN
+    c := a; a := b; b := c
+  END SwapLongInt;
+
+
+BEGIN
+  boolean := TRUE;
+  char := D.Cr;
+  shortInt := D.MaxShortInt;
+  integer := D.MaxInteger;
+  longInt := D.MaxLongInt;
+  integers[0] := 100;
+  integers[3] := 300;
+  point.x := -111;
+  point.y := -222
+END testStore.

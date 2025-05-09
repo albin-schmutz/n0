@@ -1,0 +1,40 @@
+MODULE test13;
+
+IMPORT D := testDefs, S := testStore;
+
+
+VAR
+
+  i : INTEGER;
+
+
+PROCEDURE Test(VAR arr : D.Integers);
+
+  BEGIN
+    ASSERT(S.integers[i] = 444);
+    ASSERT(S.integers[3] = 444);
+    ASSERT(arr[i] = 444);
+    ASSERT(arr[3] = 444)
+  END Test;
+
+
+PROCEDURE TestTripolis;
+
+  VAR i : INTEGER; j : INTEGER; k : INTEGER;
+
+  BEGIN
+    i := 9; j := 4; k := 1;
+    S.tripolis[i][j][k] := 123;
+    ASSERT(S.tripolis[9][4][1] = 123);
+    i := i - j; k := 0;
+    S.tripolis[i][j - 2][k * j] := 456;
+    ASSERT(S.tripolis[5][2][0] = 456)
+  END TestTripolis;
+
+
+BEGIN
+  i := 3;
+  S.integers[i] := 444;
+  Test(S.integers);
+  TestTripolis
+END test13.

@@ -1,0 +1,101 @@
+MODULE Buffer;
+
+
+CONST
+
+  BufferSize* = 104;
+
+
+TYPE
+
+  Rec* = RECORD
+    data* : ARRAY BufferSize OF CHAR;
+    val* : ARRAY 2 OF LONGINT;
+    pos* : INTEGER;
+    limit* : INTEGER
+  END;
+
+
+PROCEDURE Reset*(VAR buf : Rec);
+
+  BEGIN
+    buf.pos := 0;
+    buf.limit := BufferSize
+  END Reset;
+
+
+PROCEDURE Flip*(VAR buf : Rec);
+
+  BEGIN
+    buf.limit := buf.pos;
+    buf.pos := 0
+  END Flip;
+
+
+PROCEDURE GetChar*(VAR buf : Rec; VAR ch : CHAR);
+
+  BEGIN
+    ASSERT(buf.pos < buf.limit);
+    ch := buf.data[buf.pos];
+    buf.pos := buf.pos + 1
+  END GetChar;
+
+
+PROCEDURE PutChar*(VAR buf : Rec; ch : CHAR);
+
+  BEGIN
+    ASSERT(buf.pos < buf.limit);
+    buf.data[buf.pos] := ch;
+    buf.pos := buf.pos + 1
+  END PutChar;
+
+
+PROCEDURE GetChars*(VAR buf : Rec; size : INTEGER; VAR i : LONGINT);
+
+  VAR end : INTEGER;
+
+  BEGIN
+    ASSERT(size > 0);
+    ASSERT(size <= 8);
+    i := 0;
+    end := buf.pos + size;
+    ASSERT(end <= buf.limit);
+    WHILE buf.pos < end DO
+      i := BITO(ASH(i, 8), ORD(buf.data[buf.pos]));
+      buf.pos := buf.pos + 1
+    END
+  END GetChars;
+
+
+PROCEDURE PutChars*(VAR buf : Rec; size : INTEGER; i : LONGINT);
+
+  VAR end : INTEGER;
+
+  BEGIN
+    ASSERT(size > 0);
+    ASSERT(size <= 8);
+    end := buf.pos + size;
+    ASSERT(end < buf.limit);
+    WHILE end > buf.pos DO
+      end := end - 1;
+      buf.data[end] := CHR(BITA(i, 255));
+      i := ASH(i, -8)
+    END;
+    buf.pos := buf.pos + size
+  END PutChars;
+ 
+
+PROCEDURE PutBuffer*(VAR buf : Rec; VAR buf2 : Rec);
+
+  VAR pos : INTEGER;
+
+  BEGIN
+    pos := buf2.pos;
+    WHILE (buf.pos < buf.limit) & (pos < buf2.limit) DO
+      PutChar(buf, buf2.data[pos]);
+      pos := pos + 1
+    END
+  END PutBuffer;
+
+
+END Buffer.

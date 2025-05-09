@@ -1,0 +1,44 @@
+MODULE test07;
+
+TYPE
+
+  input = ARRAY 10 OF CHAR;
+  output = ARRAY 20 OF CHAR;
+
+  both = RECORD
+    c : CHAR;
+    in : input;
+    out : output
+  END;
+
+
+VAR
+
+  in : input;
+  i : INTEGER;
+  b : both;
+
+
+PROCEDURE Copy(VAR in : input; VAR b : both);
+
+  VAR i : INTEGER;
+
+  BEGIN
+    i := 0;
+    WHILE i < 10 DO
+      b.out[i] := in[i]; i := i + 1
+    END;
+    ASSERT(b.out[2] = 43X);
+    ASSERT(b.out[3] = 44X)
+  END Copy;
+
+BEGIN
+  i := 10;
+  REPEAT
+    i := i - 1;
+    in[i] := CHR(75 - (10 - i))
+  UNTIL i = 0;
+  ASSERT(in[0] = 41X);
+  ASSERT(in[1] = 42X);
+  Copy(in, b)
+END test07.

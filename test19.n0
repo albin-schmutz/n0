@@ -1,0 +1,21 @@
+MODULE test19;
+
+IMPORT S := testStore;
+
+VAR a : BOOLEAN;
+
+
+PROCEDURE A(b : BOOLEAN);
+
+  BEGIN
+    S.SwapBoolean(a, b);
+    ASSERT(~a);
+    ASSERT(b)
+  END A;
+
+
+BEGIN
+  a := TRUE;
+  A(~a);
+  ASSERT(~a)
+END test19.

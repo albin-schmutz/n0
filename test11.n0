@@ -1,0 +1,14 @@
+MODULE test11;
+
+(* merge_jumps test *)
+
+VAR
+
+  a : INTEGER; b : INTEGER; test : BOOLEAN;
+
+
+BEGIN
+  a := 200; b := 201;
+  test := ((a > b) OR (a < b)) & ~((a = b) OR (a > b));
+  ASSERT(test)
+END test11.

@@ -1,0 +1,32 @@
+MODULE Print;
+
+IMPORT Buffer, System;
+
+
+PROCEDURE To(VAR buf : Buffer.Rec; file : INTEGER);
+
+  VAR dummy : LONGINT;
+
+  BEGIN
+    System.GetInfo(buf.val[0], file);
+    Buffer.Flip(buf);
+    System.FileWrite(dummy, buf);
+    Buffer.Reset(buf)
+  END To;
+
+
+PROCEDURE ToErr*(VAR buf : Buffer.Rec);
+
+  BEGIN
+    To(buf, System.InfoStderr)
+  END ToErr;
+
+
+PROCEDURE ToOut*(VAR buf : Buffer.Rec);
+
+  BEGIN
+    To(buf, System.InfoStdout)
+  END ToOut;
+
+
+END Print.

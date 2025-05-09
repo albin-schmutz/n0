@@ -1,0 +1,24 @@
+MODULE testDefs;
+
+
+CONST
+
+  Yes* = TRUE; No* = FALSE;
+
+  MaxShortInt* = 7FFFH;
+  MaxInteger* = 7FFFFFFFH;
+  MaxLongInt* = 7FFFFFFFFFFFFFFFH;
+
+  Cr* = 0AX; Lf* = 0DX;
+
+
+TYPE
+
+  MiniInt* = SHORTINT;
+  Integers* = ARRAY 4 OF INTEGER;
+  Point* = RECORD
+    x* : INTEGER; y* : SHORTINT
+  END;
+
+
+END testDefs.

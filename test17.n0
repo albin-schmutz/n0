@@ -1,0 +1,22 @@
+MODULE test17;
+
+IMPORT D := testDefs, S := testStore;
+
+
+VAR
+
+  point : D.Point;
+
+
+PROCEDURE Test(VAR p : D.Point; i : INTEGER);
+
+  BEGIN
+    p.x := i; p.y := -i
+  END Test;
+
+
+BEGIN
+  Test(point, 12);
+  ASSERT(point.x = 12);
+  ASSERT(-point.x = point.y)
+END test17.

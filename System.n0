@@ -1,0 +1,117 @@
+MODULE System;
+
+IMPORT Buffer;
+
+
+CONST
+
+  InfoOS* = 1;
+  InfoStdin* = 2; InfoStdout* = 3; InfoStderr* = 4;
+  InfoArgc* = 5;
+
+  ModeRead* = 1; ModeWrite* = 2;
+
+
+TYPE
+
+  OS* = RECORD
+    os : LONGINT;
+    pathSep* : CHAR;
+    isWindows* : BOOLEAN
+  END;
+
+
+VAR
+
+  os* : OS;
+
+
+PROCEDURE Halt*(nr : LONGINT);
+
+  PROCEDURE Halt0(VAR nr : LONGINT);
+
+    BEGIN
+      SYS(0, nr, nr)
+    END Halt0;
+
+  BEGIN
+    Halt0(nr)
+  END Halt;
+
+
+PROCEDURE Exec*(VAR x : LONGINT; VAR buf : Buffer.Rec);
+
+  BEGIN
+    SYS(1, x, buf)
+  END Exec;
+
+
+PROCEDURE GetInfo*(VAR x : LONGINT; nr : INTEGER);
+
+  VAR nr2 : LONGINT;
+
+  PROCEDURE GetInfo0(VAR x : LONGINT; VAR nr : LONGINT);
+ 
+    BEGIN
+      SYS(2, x, nr)
+    END GetInfo0;
+
+  BEGIN
+    nr2 := nr;
+    GetInfo0(x, nr2)
+  END GetInfo;
+
+
+PROCEDURE GetArg*(VAR len : LONGINT; VAR buf : Buffer.Rec);
+
+  BEGIN
+    SYS(3, len, buf)
+  END GetArg;
+
+
+PROCEDURE GetEnv*(VAR len : LONGINT; VAR buf : Buffer.Rec);
+
+  BEGIN
+    SYS(4, len, buf)
+  END GetEnv;
+
+
+PROCEDURE FileOpen*(VAR file : LONGINT; VAR buf : Buffer.Rec);
+
+  BEGIN
+    SYS(5, file, buf)
+  END FileOpen;
+
+
+PROCEDURE FileClose*(file : LONGINT);
+
+  PROCEDURE FileClose0(VAR f : LONGINT);
+
+    BEGIN
+      SYS(6, f, f)
+    END FileClose0;
+
+  BEGIN
+    FileClose0(file)
+  END FileClose;
+
+
+PROCEDURE FileRead*(VAR n : LONGINT; VAR buf : Buffer.Rec);
+
+  BEGIN
+    SYS(7, n, buf)
+  END FileRead;
+
+
+PROCEDURE FileWrite*(VAR n : LONGINT; VAR buf : Buffer.Rec);
+
+  BEGIN
+    SYS(8, n, buf)
+  END FileWrite;
+
+
+BEGIN
+  GetInfo(os.os, InfoOS);
+  os.isWindows := os.os = 1;
+  IF os.isWindows THEN os.pathSep := 5CX ELSE os.pathSep := 2FX END
+END System.

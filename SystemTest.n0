@@ -1,0 +1,144 @@
+MODULE SystemTest;
+
+IMPORT Buffer, System;
+
+
+VAR
+
+  argc : LONGINT;
+
+
+PROCEDURE TestExec;
+
+  VAR call : Buffer.Rec;
+
+  BEGIN
+    Buffer.Reset(call);
+    (* n0 SystemTest gugus "Hello !" -123 *)
+    Buffer.PutChars(call, 8, 6E30205379737465H);
+    Buffer.PutChars(call, 8, 6D54657374206775H);
+    Buffer.PutChars(call, 8, 677573202248656CH);
+    Buffer.PutChars(call, 8, 6C6F202122202D31H);
+    Buffer.PutChars(call, 3, 323300H);
+    Buffer.Flip(call);
+    System.Exec(call.val[0], call);
+    ASSERT(call.val[0] = 0)
+  END TestExec;
+
+
+PROCEDURE TestGetArg;
+
+  VAR buf : Buffer.Rec; i : LONGINT;
+
+  BEGIN
+    buf.val[0] := 0;
+    System.GetArg(i, buf);
+    ASSERT(i = 5);
+    ASSERT(buf.pos = i);
+    ASSERT(buf.limit = Buffer.BufferSize);
+    Buffer.Flip(buf);
+    Buffer.GetChars(buf, 5, i);
+    ASSERT(i = 6775677573H); (* gugus *)
+
+    buf.val[0] := 1;
+    System.GetArg(i, buf);
+    ASSERT(i = 7);
+    ASSERT(buf.pos = i);
+    ASSERT(buf.limit = Buffer.BufferSize);
+    Buffer.Flip(buf);
+    Buffer.GetChars(buf, 7, i);
+    ASSERT(i = 48656C6C6F2021H); (* Hello ! *)
+
+    buf.val[0] := 2;
+    System.GetArg(i, buf);
+    ASSERT(i = 4);
+    ASSERT(buf.pos = i);
+    ASSERT(buf.limit = Buffer.BufferSize);
+    Buffer.Flip(buf);
+    Buffer.GetChars(buf, 4, i);
+    ASSERT(i = 2D313233H) (* -123 *)
+  END TestGetArg;
+
+
+PROCEDURE TestGetEnv;
+
+  VAR buf : Buffer.Rec; i : LONGINT;
+
+  BEGIN
+    IF System.os.isWindows THEN
+      Buffer.Reset(buf);
+      Buffer.PutChars(buf, 7, 77696E64697200H); (* windir *)
+      System.GetEnv(i, buf);
+      ASSERT(i = 10);
+      ASSERT(buf.pos = i);
+      ASSERT(buf.limit = Buffer.BufferSize);
+      Buffer.Flip(buf);
+      Buffer.GetChars(buf, 8, i);
+      ASSERT(i = 433A5C57494E444FH); (* C:\WINDOWS *)
+      Buffer.GetChars(buf, 2, i);
+      ASSERT(i = 5753H)
+    ELSE
+      ASSERT(FALSE) (* TODO *)
+    END
+  END TestGetEnv;
+
+
+PROCEDURE TestFile;
+
+  VAR buf : Buffer.Rec; i : INTEGER; n : LONGINT;
+
+  BEGIN
+    Buffer.Reset(buf);
+    Buffer.PutChars(buf, 4, 746D7000H); (* tmp *)
+    Buffer.Flip(buf);
+    buf.val[1] := System.ModeWrite;
+    System.FileOpen(buf.val[0], buf);
+    ASSERT(buf.val[0] # 0);
+    i := 0;
+    WHILE i < 10 DO
+      Buffer.Reset(buf);
+      (* Hallo Welt *)
+      Buffer.PutChars(buf, 8, 48616C6C6F205765H);
+      Buffer.PutChars(buf, 4, 6C74210AH);
+      Buffer.Flip(buf);
+      System.FileWrite(n, buf);
+      ASSERT(n = 12);
+      i := i + 1
+    END;
+    System.FileClose(buf.val[0]);
+
+    Buffer.Reset(buf);
+    Buffer.PutChars(buf, 4, 746D7000H); (* tmp *)
+    Buffer.Flip(buf);
+    buf.val[1] := System.ModeRead;
+    System.FileOpen(buf.val[0], buf);
+    ASSERT(buf.val[0] # 0);
+    Buffer.Reset(buf);
+    System.FileRead(n, buf);
+    ASSERT(n = Buffer.BufferSize);
+    ASSERT(buf.data[0] = 48X);
+    ASSERT(buf.data[1] = 61X);
+    ASSERT(buf.data[2] = 6CX);
+    ASSERT(buf.data[3] = 6CX);
+    ASSERT(buf.data[4] = 6FX);
+    ASSERT(buf.data[10] = 21X);
+    ASSERT(buf.data[11] = 0AX);
+    ASSERT(buf.data[12] = 48X);
+    Buffer.Reset(buf);
+    System.FileRead(n, buf);
+    ASSERT(n = 120 - Buffer.BufferSize);
+    System.FileClose(buf.val[0])
+  END TestFile;
+
+
+BEGIN
+  System.GetInfo(argc, System.InfoArgc);
+  IF argc = 0 THEN
+    TestExec;
+    TestGetEnv;
+    TestFile
+  ELSE
+    ASSERT(argc = 3);
+    TestGetArg
+  END
+END SystemTest.

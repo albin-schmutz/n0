@@ -1,0 +1,171 @@
+MODULE test01;
+
+IMPORT D := testDefs, S := testStore;
+
+
+VAR
+
+  a : BOOLEAN;
+  b : BOOLEAN;
+  c : BOOLEAN;
+
+
+PROCEDURE BoolConsts;
+
+  BEGIN
+    ASSERT(TRUE);
+    ASSERT(D.Yes);
+    ASSERT(~FALSE);
+    ASSERT(~D.No);
+    ASSERT(~(~D.Yes));
+    ASSERT(~D.No);
+    ASSERT(~~D.Yes)
+  END BoolConsts;
+
+
+PROCEDURE BoolValues;
+
+  VAR x : BOOLEAN;
+
+  BEGIN
+    x := D.Yes; ASSERT(x);
+    ASSERT(S.boolean);
+    a := ~S.boolean; ASSERT(~a);
+    x := ~a; ASSERT(~(~x));
+    S.SwapBoolean(x, a);
+    ASSERT(~x);
+    ASSERT(a)
+  END BoolValues;
+
+
+PROCEDURE BoolConstRelations;
+
+  BEGIN
+    ASSERT(FALSE = ~~FALSE);
+    ASSERT(TRUE = (D.Yes));
+    ASSERT(TRUE # D.No);
+    ASSERT(TRUE # ~TRUE);
+    ASSERT(FALSE < D.Yes);
+    ASSERT(TRUE > D.No);
+    ASSERT(FALSE <= TRUE);
+    ASSERT(TRUE >= FALSE);
+    ASSERT(TRUE <= TRUE);
+    ASSERT(FALSE >= FALSE)
+  END BoolConstRelations;
+
+
+PROCEDURE BoolValueConstRelations;
+
+  VAR x : BOOLEAN;
+
+  BEGIN
+    ASSERT(S.boolean = (D.Yes));
+    x := S.boolean;
+    ASSERT(~x = D.No);
+    ASSERT(FALSE # S.boolean);
+    ASSERT(FALSE < D.Yes);
+    ASSERT(S.boolean > D.No);
+    ASSERT(FALSE <= S.boolean);
+    ASSERT(S.boolean >= FALSE);
+    ASSERT(S.boolean <= S.boolean);
+    ASSERT(FALSE >= FALSE)
+  END BoolValueConstRelations;
+
+
+PROCEDURE BoolValueRelations;
+
+  VAR x : BOOLEAN;
+
+  BEGIN
+    a := FALSE;
+    x := D.No;
+    ASSERT(a = x);
+    ASSERT(S.boolean = ~(a));
+    ASSERT(S.boolean # a);
+    ASSERT(~S.boolean # ~a);
+    ASSERT(S.boolean # ~S.boolean);
+    ASSERT(~S.boolean = ~S.boolean);
+    ASSERT(a < S.boolean);
+    ASSERT(S.boolean > a)
+  END BoolValueRelations;
+
+
+PROCEDURE BoolLogicOperators;
+
+  VAR x : BOOLEAN;
+
+  BEGIN
+    ASSERT(~S.boolean OR FALSE OR TRUE);
+    a := D.No;
+    ASSERT(~(S.boolean & a));
+    b := TRUE;
+    ASSERT(b OR a OR D.No);
+    c := TRUE;
+    ASSERT(a & b OR c);
+    x := c & a;
+    ASSERT(~x)
+  END BoolLogicOperators;
+
+
+PROCEDURE Algebra(a : BOOLEAN; b : BOOLEAN; c : BOOLEAN);
+
+  BEGIN
+
+    (* Associativity *)
+
+    ASSERT(((a OR b) OR c) = (a OR (b OR c)));
+    ASSERT(((a & b) & c) = (a & (b & c)));
+
+    (* Commutativity *)
+
+    ASSERT((a OR b) = (b OR a));
+    ASSERT((a & b) = (b & a));
+
+    (* Distributivity *)
+
+    ASSERT(a OR b & c = (a OR b) & (a OR c));
+
+    (* Idempotence *)
+
+    ASSERT((a OR a) = a);
+    ASSERT((a & a) = a);
+
+    (* Identity *)
+
+    ASSERT(a OR FALSE = a);
+    ASSERT(a & TRUE = a);
+
+    (* Annihilator *)
+
+    ASSERT(c & FALSE = FALSE);
+    ASSERT(c OR TRUE = TRUE);
+
+    (* Absorption *)
+
+    ASSERT(c OR (c & a) = c);
+    ASSERT(c & (c OR a) = c);
+
+    (* Complementation *)
+
+    ASSERT(b & ~b = FALSE);
+    ASSERT(b OR ~b = TRUE);
+
+    (* Morgan *)
+
+    ASSERT(~b OR ~c = ~(b & c));
+    ASSERT(~b & ~c = ~(b OR c))
+
+  END Algebra;
+
+
+BEGIN
+  BoolConsts;
+  BoolValues;
+  BoolConstRelations;
+  BoolValueConstRelations;
+  BoolValueRelations;
+  BoolLogicOperators;
+  Algebra(D.Yes, D.No, D.No);
+  Algebra(D.No, D.No, D.No);
+  Algebra(D.No, D.Yes, D.No)
+END test01.
